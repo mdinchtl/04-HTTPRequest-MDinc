@@ -1,103 +1,47 @@
+using System.Collections;
 using UnityEngine;
-using System;
-using System.Collections.Generic;
-//using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-//using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.WebRequestMethods;
+using UnityEngine.Networking;
 using TMPro;
-
-
+using System.Text.RegularExpressions;
  
-
- 
-
- 
-
-public class httpreq : MonoBehaviour
+public class LehrerDetailsLoader : MonoBehaviour
 {
-
+    [Header("TMP Text Fields")]
+    public TextMeshProUGUI tmpText1; // Erstes Lehrerfeld
+    public TextMeshProUGUI tmpText2; // Zweites Lehrerfeld
  
-
-    //string newURLH = "http://192.168.10.221/H";
-    //string newURLL = "http://192.168.10.221/L";
-    string newURLH = "https://www.htl-salzburg.ac.at/startseite.html";
-    string newURLL = "https://www.htl-salzburg.ac.at/startseite.html";
-
+    [Header("URLs der Lehrer-Seiten")]
+    public string url1 = "https://www.htl-salzburg.ac.at/lehrerinnen-details/meerwald-stadler-susanne-prof-dipl-ing-g-009.html";
+    public string url2 = "https://www.htl-salzburg.ac.at/lehrerinnen-details/schweiberer-franz-prof-dipl-ing-c-205.html";
  
-
- 
-
-    // See https://aka.ms/new-console-template for more information
-    [SerializeField]
-    string responseString = string.Empty;
-
- 
-
- 
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-
+        if (tmpText1 != null)
+            StartCoroutine(LoadLehrerDetails(url1, tmpText1));
+ 
+        if (tmpText2 != null)
+            StartCoroutine(LoadLehrerDetails(url2, tmpText2));
     }
-
  
-
-    // Update is called once per frame
-    void Update()
+    IEnumerator LoadLehrerDetails(string url, TextMeshProUGUI tmpText)
     {
-
+        UnityWebRequest www = UnityWebRequest.Get(url);
+        yield return www.SendWebRequest();
  
-
-            Console.WriteLine("Hello, World Framework!");
-
- 
-
-            doSomething();
-
- 
-
- 
-
-    }
-
- 
-
- 
-
-    void doSomething()
-    {
-        Task.Run(async () =>
+        if (www.result != UnityWebRequest.Result.Success)
         {
-            using (HttpClient client = new HttpClient())
-            {
-                try
-                {
-                    // Send a GET request to the specified URL
-                    HttpResponseMessage response = await client.GetAsync(newURLH);
-                    // Ensure the request was successful
-                    response.EnsureSuccessStatusCode();
-                    // Read the response content as a string
-                    responseString = await response.Content.ReadAsStringAsync();
-                    // Log the response string to the Unity console
-                    Debug.Log("Response: " + responseString);
-                    Console.WriteLine("Response: " + responseString);
-
+            tmpText.text = "Fehler beim Laden der Seite: " + www.error;
+        }
+        else
+        {
+            string html = www.downloadHandler.text;
  
-
+            // Regex zum Auslesen der Felder
+            string name = Regex.Match(html, @"<div class=""field Lehrername"">.*?<span class=""text"">(.*?)</span>", RegexOptions.Singleline).Groups[1].Value;
+            string raum = Regex.Match(html, @"<div class=""field Raum"">.*?<span class=""text"">(.*?)</span>", RegexOptions.Singleline).Groups[1].Value;
+            string sprechstunde = Regex.Match(html, @"<div class=""field SprStunde"">.*?<span class=""text"">(.*?)</span>", RegexOptions.Singleline).Groups[1].Value;
  
-
-                }
-                catch (HttpRequestException e)
-                {
-                    Debug.LogError("Request error: " + e.Message);
-                    Console.WriteLine("Request error: " + e.Message);
-                }
-            }
-        }).GetAwaiter().GetResult();
+            tmpText.text = $"Name: {name}\nRaum: {raum}\nSprechstunde: {sprechstunde}";
+        }
     }
 }
