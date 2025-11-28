@@ -11,7 +11,7 @@ public class LehrerDetailsLoader : MonoBehaviour
     public TextMeshProUGUI tmpText2; // Zweites Lehrerfeld
  
     [Header("URLs der Lehrer-Seiten")]
-    public string url1 = "https://www.htl-salzburg.ac.at/lehrerinnen-details/meerwald-stadler-susanne-prof-dipl-ing-g-009.html";
+    public string url1 = "https://www.htl-salzburg.ac.at/lehrerinnen-details/holzer-roland-prof-dipl-ing-fh-b-211.html";
     public string url2 = "https://www.htl-salzburg.ac.at/lehrerinnen-details/schweiberer-franz-prof-dipl-ing-c-205.html";
  
     void Start()
